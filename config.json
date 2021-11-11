@@ -1,7 +1,7 @@
 {
-	"api_key": "GxS/hJQOWuFynMHA3jKjXg==",
-	"api_secret": "KTOLnOZuWSuTW8i6lIkVAnc1ThUAy12FxtZ0cmHlJbA=",
-	"api_passphrase": "passphrase",
+	"api_key": "",
+	"api_secret": "",
+	"api_passphrase": "",
 	"ws_url": "ws://127.0.0.1:8084/",
 	"rest_url": "",
 	"symbol": "BTCUSD.PERP",
