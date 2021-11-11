@@ -1,0 +1,24 @@
+{
+	"api_key": "GxS/hJQOWuFynMHA3jKjXg==",
+	"api_secret": "KTOLnOZuWSuTW8i6lIkVAnc1ThUAy12FxtZ0cmHlJbA=",
+	"api_passphrase": "passphrase",
+	"ws_url": "ws://127.0.0.1:8084/",
+	"rest_url": "",
+	"symbol": "BTCUSD.PERP",
+	"index_symbol": ".BTCUSD",
+	"check_position_limits": false,
+	"trading_params": {
+		"order_relist_decay": 1.1,
+		"order_size_decay": 1.1,
+		"min_spread": 0.01,
+		"maintain_spread": true,
+		"price_decay": 0.1,
+		"start_order_size": 50,
+		"random_order_size": false,
+		"decay_order_size": true,
+		"order_step_size": 10,
+		"n_levels": 3,
+		"max_long_pos_btc": 1,
+		"max_short_pos_btc": 1
+	}
+}
