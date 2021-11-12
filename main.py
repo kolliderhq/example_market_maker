@@ -42,9 +42,6 @@ class OrderManager(KolliderWsClient):
 	def on_message(self, _, msg):
 		parse_msg(self.exchange_state, msg)
 	
-	def get_relist_decay(self, interval, index):
-		return interval * (self.conf["trading_params"]['order_relist_decay']**index)
-
 	def get_order_size_decay(self, interval, index):
 		return int(interval * (self.conf["trading_params"]['order_size_decay']**index))
 
@@ -107,7 +104,7 @@ class OrderManager(KolliderWsClient):
 	def build_order(self, index, side):
 		"""Create an order object."""
 		trading_params = conf["trading_params"]
-		if trading_params['random_order_size'] is True:
+		if trading_params['is_random_order_size'] is True:
 			quantity = random.randint(trading_params["min_order_size"], trading_params["max_order_size"])
 		else:
 			quantity = trading_params['start_order_size'] + \
@@ -205,7 +202,7 @@ class OrderManager(KolliderWsClient):
 				if desired_order.quantity != remaining_quantity or (
 						# If price has changed, and the change is more than our RELIST_INTERVAL, amend.
 						desired_order.price != order.price and
-						abs((desired_order.price / order.price) - 1) > self.get_relist_decay(trading_params["price_decay"], level_index)):
+						abs((desired_order.price / order.price) - 1) > trading_params["relist_tollerance"]):
 					open_order = OpenOrder()
 					open_order.price = desired_order.price
 					open_order.quantity = desired_order.quantity
@@ -297,7 +294,6 @@ class OrderManager(KolliderWsClient):
 		self.fetch_symbols()
 		self.who_am_i()
 
-		return
 		while True:
 			sleep(1)
 			success = self.update_start_prices()
