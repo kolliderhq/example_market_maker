@@ -294,7 +294,10 @@ class OrderManager(KolliderWsClient):
 		self.fetch_tradable_symbols()
 		self.fetch_positions()
 		self.fetch_open_orders()
+		self.fetch_symbols()
 		self.who_am_i()
+
+		return
 		while True:
 			sleep(1)
 			success = self.update_start_prices()

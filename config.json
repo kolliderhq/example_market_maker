@@ -16,7 +16,7 @@
 		"start_order_size": 50,
 		"random_order_size": false,
 		"decay_order_size": true,
-		"order_step_size": 10,
+		"order_step_size": 0.02,
 		"n_levels": 3,
 		"max_long_pos_btc": 1,
 		"max_short_pos_btc": 1
