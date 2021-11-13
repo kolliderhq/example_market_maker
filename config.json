@@ -7,6 +7,7 @@
 	"symbol": "BTCUSD.PERP",
 	"index_symbol": ".BTCUSD",
 	"check_position_limits": false,
+	"enable_dry_run": true,
 	"trading_params": {
 		"order_size_decay": 1.5,
 		"min_spread": 0.01,

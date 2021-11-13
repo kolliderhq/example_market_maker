@@ -154,7 +154,15 @@ class OrderManager(KolliderWsClient):
 
 		buy_orders = list(reversed(buy_orders))
 		sell_orders = list(reversed(sell_orders))
-		return self.converge_orders(buy_orders, sell_orders)
+
+		if self.conf["enable_dry_run"] and (len(buy_orders) > 0 or len(sell_orders)):
+			print ("Dry run. Would place the following orders:")
+			for sell in sell_orders:
+				print (f"{sell.side} {sell.quantity} @ price {sell.price}")
+			for buy in reversed(buy_orders):
+				print (f"{buy.side} {buy.quantity} @ price {buy.price}")
+		else:
+			return self.converge_orders(buy_orders, sell_orders)
 
 	def converge_orders(self, buy_orders, sell_orders):
 		# Covering and quoting on price is somewhat independent.

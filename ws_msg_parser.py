@@ -1,9 +1,12 @@
 from dtypes import *
-from kollider_api_client.ws import *
+from kollider_api_client.ws.ws_client import *
+import json
+
+SUCCESS = "success"
 
 def parse_msg(exchange_state, msg):
 	msg = json.loads(msg)
-	print(msg)
+	# print(msg)
 	t = msg["type"]
 	data = msg["data"]
 	if t == AUTHENTICATE:
@@ -91,6 +94,10 @@ def parse_msg(exchange_state, msg):
 	elif t == ORDER_REJECTION:
 		print("Received Order Rejection.")
 		# print(data)
+
+	elif t == SUCCESS:
+		# print(data)
+		pass
 
 	else:
 		print("Unhandled type: {}".format(msg))
