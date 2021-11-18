@@ -8,8 +8,6 @@ from decimal import Decimal
 import json
 from time import sleep, time
 
-
-
 def contract_qty_to_btc(contract_qty, price, is_inverse_priced, contract_size):
 	# for quantos, this assumes that (price * contract_size) == satoshis per contract
 	if is_inverse_priced:
@@ -312,8 +310,10 @@ class OrderManager(KolliderWsClient):
 
 
 if __name__ in "__main__":
+	import yaml
 	conf = None
-	with open("config.json",) as f:
-		conf = json.load(f)
+	with open("config.yaml",) as f:
+		conf = yaml.load(f, Loader=yaml.FullLoader)
+	print(conf)
 	om = OrderManager(conf)
 	om.run()

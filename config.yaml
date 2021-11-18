@@ -1,0 +1,23 @@
+api_key: ""
+api_secret: ""
+api_passphrase: ""
+ws_url: "ws://127.0.0.1:8084/"
+rest_url: ""
+symbol: "BTCUSD.PERP"
+index_symbol: ".BTCUSD"
+check_position_limits: false
+enable_dry_run: true # dry run will not send order and only print them to screen
+trading_params:
+  order_size_decay: 1.5
+  min_spread: 0.01
+	offset_pct: 0.001 # used to calculat start prices (e.g. 0.01 is 1% off either side ref price)
+	stack_pct: 0.001 # e.g. 0.01 is 1% of start price per level
+  maintain_spread: true
+  price_decay: 0.001
+  relist_tollerance: 0.001
+  is_random_order_size: false
+  start_order_size: 50
+  order_step_size: 10
+  n_levels: 3
+  max_long_pos_btc: 1
+  max_short_pos_btc: 1
