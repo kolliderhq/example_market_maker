@@ -102,35 +102,6 @@ class OrderManager(KolliderWsClient):
 		order_price = toNearest(start_price + index * start_price * conf["trading_params"]["stack_pct"], tick_size)
 		return order_price
 
-	# def get_price_offset(self, index, side):
-	# 	"""This creates the order stack from the starting prices given a side and index."""
-
-	# 	trading_params = conf["trading_params"]
-	# 	if trading_params['maintain_spread']:
-	# 		start_price = self.start_price_bid if side == "Bid" else self.start_price_ask
-	# 		# First positions (index 1, -1) should start right at start_position, others should branch from there
-	# 		index = index - 1 if side == "Ask" else -(index - 1)
-	# 	else:
-	# 		# Offset mode: ticker comes from a reference exchange and we define an offset.
-	# 		start_price = self.start_price_bid if index < 0 else self.start_price_ask
-
-	# 		# If we're attempting to sell, but our sell price is actually lower than the buy,
-	# 		# move over to the sell side.
-	# 		if index > 0 and start_price < self.start_price_bid:
-	# 			start_price = self.start_price_ask
-	# 		# Same for buys.
-	# 		if index < 0 and start_price > self.start_price_ask:
-	# 			start_price = self.start_price_bid
-
-	# 	tradable_symbol = self.exchange_state.tradable_symbols.get(self.target_symbol)
-	# 	if not tradable_symbol:
-	# 		return None
-
-	# 	tick_size = tradable_symbol.tick_size
-
-	# 	offset = toNearest(start_price * (1 + conf["trading_params"]["price_decay"]) ** index, tick_size)
-	# 	return offset
-
 	def build_order(self, index, side):
 		"""Create an order object."""
 		trading_params = conf["trading_params"]
@@ -154,31 +125,6 @@ class OrderManager(KolliderWsClient):
 		order.quantity = quantity # in contract qty (vs "value")
 
 		return order
-
-	# def build_order(self, index, side):
-	# 	"""Create an order object."""
-	# 	trading_params = conf["trading_params"]
-	# 	if trading_params['is_random_order_size'] is True:
-	# 		quantity = random.randint(trading_params["min_order_size"], trading_params["max_order_size"])
-	# 	else:
-	# 		quantity = trading_params['start_order_size'] + \
-	# 			(self.get_order_size_decay(
-	# 				trading_params['order_step_size'], (abs(index) - 1)))
-
-	# 	price = self.get_price_offset(index, side)
-	# 	order = OpenOrder()
-	# 	order.price = price
-	# 	order.side = side
-	# 	order.symbol = self.target_symbol
-	# 	order.margin_type = "Isolated"
-	# 	order.settlement_type = "Delayed"
-	# 	order.order_type = "Limit"
-	# 	order.ext_order_id = str(uuid4())
-	# 	order.timestamp = int(time())
-	# 	order.leverage = 100
-	# 	order.quantity = quantity # in contract qty (vs "value")
-
-	# 	return order
 
 	def place_orders(self):
 		buy_orders = []
