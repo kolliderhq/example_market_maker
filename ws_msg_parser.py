@@ -1,8 +1,11 @@
 from dtypes import *
 from kollider_api_client.ws.ws_client import *
 import json
+import copy
 
 SUCCESS = "success"
+ORDERBOOK_L2_STATE = "level2state"
+ORDERBOOK_L2_UPDATE = "orderbook_level2"
 
 def parse_msg(exchange_state, msg):
 	msg = json.loads(msg)
@@ -90,6 +93,36 @@ def parse_msg(exchange_state, msg):
 			exchange_state.positions[position.symbol] = position
 		else:
 			del exchange_state.positions[position.symbol]
+
+	elif t == ORDERBOOK_L2_STATE:
+		ob = copy.copy(Orderbook("kollider"))
+		for key, value in data["bids"].items():
+			ob.bids[int(key)] = value
+
+		for key, value in data["asks"].items():
+			ob.asks[int(key)] = value
+
+		if exchange_state.orderbooks.get(data["symbol"]) is not None:
+			del exchange_state.orderbooks[data["symbol"]]
+		exchange_state.orderbooks[data["symbol"]] = ob
+
+	elif t == ORDERBOOK_L2_UPDATE:
+		if data["side"] == "Bid":
+			orderbook = exchange_state.orderbooks.get(data["symbol"])
+			if orderbook is None:
+				return
+			if data["volume"] == 0:
+				del orderbook.bids[data["price"]]
+			else:
+				orderbook.bids[data["price"]] = data["volume"]
+		if data["side"] == "Ask":
+			orderbook = exchange_state.orderbooks.get(data["symbol"])
+			if orderbook is None:
+				return
+			if data["volume"] == 0:
+				del orderbook.asks[data["price"]]
+			else:
+				orderbook.asks[data["price"]] = data["volume"]
 
 	elif t == ORDER_REJECTION:
 		print("Received Order Rejection.")

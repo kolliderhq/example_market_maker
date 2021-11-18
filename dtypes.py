@@ -1,4 +1,6 @@
 import uuid
+from BTrees.OOBTree import OOBTree
+import copy
 
 class ExchangeState(object):
 
@@ -199,3 +201,11 @@ def parse_position(msg=None):
         position.upnl = int(msg["upnl"])
         position.rpnl = float(msg["rpnl"])
     return position
+
+class Orderbook(object):
+
+    def __init__(self, venue):
+        self.bids = copy.copy(OOBTree())
+        self.asks = copy.copy(OOBTree())
+        self.level = "l2"
+        self.venue = venue

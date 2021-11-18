@@ -15,7 +15,7 @@ def contract_qty_to_btc(contract_qty, price, is_inverse_priced, contract_size):
 	else:
 		# 100_000_000 == satoshis per BTC
 		return (contract_qty * price * contract_size) / 100_000_000
-	
+
 def toNearest(num, tickSize):
     """Given a number, round it to the nearest tick. Very useful for sussing float error
        out of numbers: e.g. toNearest(401.46, 0.01) -> 401.46, whereas processing is
@@ -24,9 +24,88 @@ def toNearest(num, tickSize):
     tickDec = Decimal(str(tickSize))
     return float((Decimal(round(num / tickSize, 0)) * tickDec))
 
-class OrderManager(KolliderWsClient):
+class IndexPriceCalculator(object):
+	""" Calculates a reference price based off the index price.
+	"""
+
+	def __init__(self):
+		self.is_done = False
+		self.price = None
+
+	def is_ready(self):
+		""" Returns a boolean indicating if the price is considered stable.
+			This is relevant for pricing models that take multiple prices to
+			get ready.
+		"""
+		return self.is_done
+
+	def get_price(self):
+		""" Returns the current calculated price whether ready or not. Initially,
+			the price is None.
+		"""
+		return self.price
+
+	def update_price(self, exchange_state: ExchangeState):
+		""" Updates the current price in the calculator and returns the calculated
+			result whether the it is ready or not for use.
+		"""
+		if exchange_state and exchange_state.index_values:
+			index_price = exchange_state.index_values.get(exchange_state.index_symbol)
+			if index_price:
+				self.is_done = True
+				self.price = index_price.value
+		return self.price
+
+class MidPriceCalculator(object):
+	""" Calculates a reference price based off the mid.
+	"""
+
+	def __init__(self):
+		self.is_done = False
+		self.price = None
+
+	def is_ready(self):
+		""" Returns a boolean indicating if the price is considered stable.
+			This is relevant for pricing models that take multiple prices to
+			get ready.
+		"""
+		return self.is_done
+
+	def get_price(self):
+		""" Returns the current calculated price whether ready or not. Initially,
+			the price is None.
+		"""
+		return self.price
+
+	def update_price(self, exchange_state: ExchangeState):
+		""" Updates the current price in the calculator and returns the calculated
+			result whether the it is ready or not for use.
+		"""
+		if exchange_state and exchange_state.orderbooks:
+			orderbook = exchange_state.orderbooks.get(exchange_state.symbol)
+			if orderbook:
+				bid_price = ask_price = None
+				try:
+					bid_price = orderbook.bids.items()[-1][0]
+					ask_price = orderbook.asks.items()[0][0]
+					mid_price = float(bid_price + ask_price) / 2
+
+					# Kollider's raw prices are decimal-place-shifted ints
+					dp = exchange_state.tradable_symbols[exchange_state.symbol].price_dp
+					if not dp:
+						dp = 0
+					self.price = mid_price * (10**-dp)
+
+					print(f"Got bid {bid_price}, ask {ask_price}, mid {mid_price}, and calc'd {self.price}")
+
+					self.is_done = True
+				except IndexError as e:
+					print (f"Did not have a bid or ask price in orderbook: {e}")
+		return self.price
+
+class MarketMaker(KolliderWsClient):
 	def __init__(self, conf):
-		super(OrderManager, self).__init__()
+		super(MarketMaker, self).__init__()
 		self.conf = conf
 		self.target_symbol = conf["symbol"]
 		self.index_symbol = conf["index_symbol"]
@@ -37,20 +116,38 @@ class OrderManager(KolliderWsClient):
 		self.start_price_ask = None
 		self.start_price_bid = None
 
+		self.reference_price = None
+		reference_type = conf['trading_params']['reference_price_type']
+		if reference_type == "index":
+			self.reference_price = IndexPriceCalculator()
+		elif reference_type == "mid":
+			self.reference_price = MidPriceCalculator()
+		else:
+			raise Exception(f'Unrecognized reference_price_type {reference_type} in config. \
+				Options are "index" and "mid".')
+
 	def on_message(self, _, msg):
 		parse_msg(self.exchange_state, msg)
-	
-	def get_order_size_decay(self, interval, index):
-		return int(interval * (self.conf["trading_params"]['order_size_decay']**index))
+
+	def sub_orderbook_l2(self, symbol):
+		msg = {
+			"type": "subscribe",
+			"channels": ["orderbook_level2"],
+			"symbols": [symbol]
+		}
+		json_msg = json.dumps(msg)
+		self.ws.send(json_msg)
 
 	def update_start_prices(self):
 		# Making our reference price the current index price of the trade contract.
 		# You could change this to your own reference price. 
-		reference_price = self.exchange_state.index_values.get(self.index_symbol)
+		self.reference_price.update_price(self.exchange_state)
 
-		if not reference_price:
-			print("Doesn't have reference price.")
-			return None
+		if not self.reference_price.is_ready():
+			print("Reference price not yet ready.")
+			return False
+
+		# print(f"Reference price {self.reference_price.get_price()}")
 
 		tradable_symbol = self.exchange_state.tradable_symbols.get(self.target_symbol)
 
@@ -58,14 +155,8 @@ class OrderManager(KolliderWsClient):
 			print("Doesn't have tradable symbol.")
 			return None
 
-		tick_size = tradable_symbol.tick_size
-
-		# self.start_price_bid = reference_price.value - tick_size
-		# self.start_price_ask = reference_price.value + tick_size
-
-		self.start_price_bid = reference_price.value * (1 - self.conf['trading_params']['offset_pct'])
-		self.start_price_ask = reference_price.value * (1 + self.conf['trading_params']['offset_pct'])
-		# print (f"start prices: {reference_price.value} to {self.start_price_bid} {self.start_price_ask}")
+		self.start_price_bid = self.reference_price.get_price() * (1 - self.conf['trading_params']['offset_pct'])
+		self.start_price_ask = self.reference_price.get_price() * (1 + self.conf['trading_params']['offset_pct'])
 
 		# Back off if our spread is too small.
 		min_spread = self.conf['trading_params']['min_spread']
@@ -78,7 +169,6 @@ class OrderManager(KolliderWsClient):
 	def get_order_price(self, index, side):
 		"""This creates the order stack from the starting prices given a side and index."""
 
-		trading_params = conf["trading_params"]
 		start_price = self.start_price_bid if side == "Bid" else self.start_price_ask
 		# First positions (index 1, -1) should start right at start_position, others should branch from there
 		index = index - 1 if side == "Ask" else -(index - 1)
@@ -136,7 +226,7 @@ class OrderManager(KolliderWsClient):
 
 		trading_prams = self.conf["trading_params"]
 
-		for i in range(1, trading_prams["n_levels"] + 1):
+		for i in range(1, trading_prams["num_levels"] + 1):
 
 			if long_btc_remaining > 0:
 				buy_order = self.build_order(i, 'Bid')
@@ -190,7 +280,7 @@ class OrderManager(KolliderWsClient):
 
 		trading_params = conf["trading_params"]
 		# Bid orders should be order from lowest to highest and ask orders should be from highest to lowest.
-		level_indices = 2 * list(range(0, trading_params["n_levels"]))[::-1]
+		level_indices = 2 * list(range(0, trading_params["num_levels"]))[::-1]
 
 		for index, order in enumerate(existing_orders):
 			# logger.info("Existing Orders found.")
@@ -293,6 +383,7 @@ class OrderManager(KolliderWsClient):
 		# Subscribing to index prices.
 		self.sub_index_price([self.conf["index_symbol"]])
 		self.sub_position_states()
+		self.sub_orderbook_l2(self.conf["symbol"])
 		# Fetching symbols that are available to trade.
 		self.fetch_tradable_symbols()
 		self.fetch_positions()
@@ -315,5 +406,5 @@ if __name__ in "__main__":
 	with open("config.yaml",) as f:
 		conf = yaml.load(f, Loader=yaml.FullLoader)
 	print(conf)
-	om = OrderManager(conf)
-	om.run()
+	mm = MarketMaker(conf)
+	mm.run()
