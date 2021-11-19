@@ -15,3 +15,15 @@ Run the market maker
 ```
 python src/main.py
 ```
+
+### Current Strategies
+
+You can configer the stragegy of the Market Maker in the `conig.yaml`. 
+
+1. Mid Price
+
+The mid price strategy will place orders symmetrical and in set intervals around the mid price of the Kollider book. 
+
+2. Index Market Maker
+
+The index price market making strategy will place orders around the index price of underlying asset.
