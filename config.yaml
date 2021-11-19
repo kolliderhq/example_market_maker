@@ -16,6 +16,6 @@ trading_params:
   is_random_order_size: false
   start_order_size: 50
   order_step_size: 10
-  num_levels: 3 # the number of orders the MM will make on each side
+  num_levels: 2 # the number of orders the MM will make on each side
   max_long_pos_btc: 1
   max_short_pos_btc: 1

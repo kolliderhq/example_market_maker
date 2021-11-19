@@ -4,28 +4,28 @@ import copy
 
 class ExchangeState(object):
 
-	def __init__(self, venue_name):
-		self.positions = {}
-		self.open_orders = {}
-		self.balances = {}
-		self.mark_prices = {}
-		self.index_values = {}
-		self.tradable_symbols = {}
-		self.whoami = {}
-		self.price_tickers = {}
-		self.orderbooks = {}
-		self.venue_name = venue_name
-		self.is_authenticated = False
-		self.symbol = None
-		self.index_symbol = None
+    def __init__(self, venue_name):
+        self.positions = {}
+        self.open_orders = {}
+        self.balances = {}
+        self.mark_prices = {}
+        self.index_values = {}
+        self.tradable_symbols = {}
+        self.whoami = {}
+        self.price_tickers = {}
+        self.orderbooks = {}
+        self.venue_name = venue_name
+        self.is_authenticated = False
+        self.symbol = None
+        self.index_symbol = None
 
-	def to_dict(self):
-		return {
-			"whoami": self.whoami,
-			"balances": self.balances,
-			"index_values": self.index_values,
-			"is_authenticated": self.is_authenticated,
-		}
+    def to_dict(self):
+        return {
+            "whoami": self.whoami,
+            "balances": self.balances,
+            "index_values": self.index_values,
+            "is_authenticated": self.is_authenticated,
+        }
 
 class IndexValue(object):
 	def __init__(self):
