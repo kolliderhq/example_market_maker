@@ -1,9 +1,15 @@
 from dtypes import *
-from kollider_api_client.ws import *
+from kollider_api_client.ws.ws_client import *
+import json
+import copy
+
+SUCCESS = "success"
+ORDERBOOK_L2_STATE = "level2state"
+ORDERBOOK_L2_UPDATE = "orderbook_level2"
 
 def parse_msg(exchange_state, msg):
 	msg = json.loads(msg)
-	print(msg)
+	# print(msg)
 	t = msg["type"]
 	data = msg["data"]
 	if t == AUTHENTICATE:
@@ -15,7 +21,8 @@ def parse_msg(exchange_state, msg):
 			exchange_state.is_authenticated = False
 
 	elif t == ERROR:
-		print("{}".format(msg["message"]))
+		print(msg)
+		print("{}".format(data))
 
 	elif t == TICKER:
 		pass
@@ -88,9 +95,52 @@ def parse_msg(exchange_state, msg):
 		else:
 			del exchange_state.positions[position.symbol]
 
+	elif t == ORDERBOOK_L2_STATE:
+		ob = copy.copy(Orderbook("kollider"))
+		current_ob = exchange_state.orderbooks.get(data["symbol"])
+		if current_ob:
+			ob = current_ob
+		update_type = data["update_type"]
+		if update_type == "snapshot":
+			for key, value in data["bids"].items():
+				ob.bids[int(key)] = value
+			for key, value in data["asks"].items():
+				ob.asks[int(key)] = value
+			if exchange_state.orderbooks.get(data["symbol"]) is not None:
+				del exchange_state.orderbooks[data["symbol"]]
+			exchange_state.orderbooks[data["symbol"]] = ob
+		elif update_type == "delta":
+			for key, value in data["bids"].items():
+				if value == 0:
+					try:
+						ob.bids.__delitem__(int(key))
+					except Exception as e:
+						print("couldn't delete key. Does not exist!")
+						print("KEY: {}".format(int(key)))
+						print("OB: {}".format([item for item in ob.bids.items()]))
+				else:
+					ob.bids[int(key)] = value
+			for key, value in data["asks"].items():
+				if value == 0:
+					try:
+						ob.asks.__delitem__(int(key))
+					except Exception as e:
+						print("couldn't delete key. Does not exist!")
+						print("KEY: {}".format(int(key)))
+						print("OB: {}".format([item for item in ob.asks.items()]))
+				else:
+					ob.asks[int(key)] = value
+		else:
+			print("level 2 update type not known")
+
+
 	elif t == ORDER_REJECTION:
 		print("Received Order Rejection.")
 		# print(data)
+
+	elif t == SUCCESS:
+		# print(data)
+		pass
 
 	else:
 		print("Unhandled type: {}".format(msg))

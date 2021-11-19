@@ -1,29 +1,31 @@
 import uuid
+from BTrees.OOBTree import OOBTree
+import copy
 
 class ExchangeState(object):
 
-	def __init__(self, venue_name):
-		self.positions = {}
-		self.open_orders = {}
-		self.balances = {}
-		self.mark_prices = {}
-		self.index_values = {}
-		self.tradable_symbols = {}
-		self.whoami = {}
-		self.price_tickers = {}
-		self.orderbooks = {}
-		self.venue_name = venue_name
-		self.is_authenticated = False
-		self.symbol = None
-		self.index_symbol = None
+    def __init__(self, venue_name):
+        self.positions = {}
+        self.open_orders = {}
+        self.balances = {}
+        self.mark_prices = {}
+        self.index_values = {}
+        self.tradable_symbols = {}
+        self.whoami = {}
+        self.price_tickers = {}
+        self.orderbooks = {}
+        self.venue_name = venue_name
+        self.is_authenticated = False
+        self.symbol = None
+        self.index_symbol = None
 
-	def to_dict(self):
-		return {
-			"whoami": self.whoami,
-			"balances": self.balances,
-			"index_values": self.index_values,
-			"is_authenticated": self.is_authenticated,
-		}
+    def to_dict(self):
+        return {
+            "whoami": self.whoami,
+            "balances": self.balances,
+            "index_values": self.index_values,
+            "is_authenticated": self.is_authenticated,
+        }
 
 class IndexValue(object):
 	def __init__(self):
@@ -111,16 +113,16 @@ def parse_tradable_symbols(msg=None):
 class OpenOrder(object):
 
     def __init__(self):
+        self.ext_order_id = str(uuid.uuid4())
         self.quantity = 0
         self.order_id = 0
         self.price = 0
         self.timestamp = ""
         self.filled = 0
-        self.ext_order_id = ""
         self.order_type = ""
         self.side = ""
         self.symbol = ""
-        self.leverage = 0
+        self.leverage = 100
         self.margin_type = ""
         self.settlement_type = ""
 
@@ -199,3 +201,11 @@ def parse_position(msg=None):
         position.upnl = int(msg["upnl"])
         position.rpnl = float(msg["rpnl"])
     return position
+
+class Orderbook(object):
+
+    def __init__(self, venue):
+        self.bids = copy.copy(OOBTree())
+        self.asks = copy.copy(OOBTree())
+        self.level = "l2"
+        self.venue = venue
