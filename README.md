@@ -1,10 +1,10 @@
 ## Kollider Simple Market Maker
 
-**CAOUTION**: Use at your own risk. This repo is meant to be a reference and created for educational purpose only. Do not use in production!
+**CAUTION**: Use at your own risk. This repo is meant to be a reference and created for educational purposes only. Do not use in production!
 
 ### How To Use
 
-Add your API Keys, Secret and Passphrase to the `config.yaml`. 
+Add your API Keys, Secret and Passphrase to the `config.yaml`.
 
 Install dependencies
 ```
@@ -18,11 +18,11 @@ python src/main.py
 
 ### Current Strategies
 
-You can configer the stragegy of the Market Maker in the `conig.yaml`. 
+You can configure the strategy of the Market Maker in the `config.yaml`. We are following the framework laid out in ["Demystifying Market Making"](https://kollider.medium.com/long-story-short-demystifying-market-making-98efe4f709da).
 
 #### Mid Price
 
-The mid price strategy will place orders symmetrical and in set intervals around the mid price of the Kollider book. 
+The mid price strategy will place orders symmetrically and in set intervals ("offsets") around the mid price of the Kollider orderbook.
 
 #### Index Market Maker
 
