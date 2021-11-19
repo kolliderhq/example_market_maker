@@ -1,4 +1,3 @@
 ## Kollider Simple Market Maker
 
-This is a working example of a simple market making bot that follows the index price of perpetual swap and makes markets around that
-price.
+**CAOUTION**: Use at your own risk. This repo is meant to be a reference and created for educational purpose only. Do not use in production!
