@@ -10,3 +10,8 @@ Install dependencies
 ```
 pip install -r requirements.txt
 ```
+
+Run the market maker
+```
+python src/main.py
+```
