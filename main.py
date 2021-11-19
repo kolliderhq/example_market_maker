@@ -2,6 +2,7 @@ from uuid import uuid4
 from ws_msg_parser import parse_msg
 from kollider_api_client.ws import *
 from dtypes import *
+from src.calculators import *
 import random
 from decimal import Decimal
 
@@ -24,85 +25,6 @@ def toNearest(num, tickSize):
     tickDec = Decimal(str(tickSize))
     return float((Decimal(round(num / tickSize, 0)) * tickDec))
 
-class IndexPriceCalculator(object):
-	""" Calculates a reference price based off the index price.
-	"""
-
-	def __init__(self):
-		self.is_done = False
-		self.price = None
-
-	def is_ready(self):
-		""" Returns a boolean indicating if the price is considered stable.
-			This is relevant for pricing models that take multiple prices to
-			get ready.
-		"""
-		return self.is_done
-
-	def get_price(self):
-		""" Returns the current calculated price whether ready or not. Initially,
-			the price is None.
-		"""
-		return self.price
-
-	def update_price(self, exchange_state: ExchangeState):
-		""" Updates the current price in the calculator and returns the calculated
-			result whether the it is ready or not for use.
-		"""
-		if exchange_state and exchange_state.index_values:
-			index_price = exchange_state.index_values.get(exchange_state.index_symbol)
-			if index_price:
-				self.is_done = True
-				self.price = index_price.value
-		return self.price
-
-class MidPriceCalculator(object):
-	""" Calculates a reference price based off the mid.
-	"""
-
-	def __init__(self):
-		self.is_done = False
-		self.price = None
-
-	def is_ready(self):
-		""" Returns a boolean indicating if the price is considered stable.
-			This is relevant for pricing models that take multiple prices to
-			get ready.
-		"""
-		return self.is_done
-
-	def get_price(self):
-		""" Returns the current calculated price whether ready or not. Initially,
-			the price is None.
-		"""
-		return self.price
-
-	def update_price(self, exchange_state: ExchangeState):
-		""" Updates the current price in the calculator and returns the calculated
-			result whether the it is ready or not for use.
-		"""
-		if exchange_state and exchange_state.orderbooks:
-			orderbook = exchange_state.orderbooks.get(exchange_state.symbol)
-			if orderbook:
-				bid_price = ask_price = None
-				try:
-					bid_price = orderbook.bids.items()[-1][0]
-					ask_price = orderbook.asks.items()[0][0]
-					mid_price = float(bid_price + ask_price) / 2
-
-					# Kollider's raw prices are decimal-place-shifted ints
-					dp = exchange_state.tradable_symbols[exchange_state.symbol].price_dp
-					if not dp:
-						dp = 0
-					self.price = mid_price * (10**-dp)
-
-					print(f"Got bid {bid_price}, ask {ask_price}, mid {mid_price}, and calc'd {self.price}")
-
-					self.is_done = True
-				except IndexError as e:
-					print (f"Did not have a bid or ask price in orderbook: {e}")
-		return self.price
-
 class MarketMaker(KolliderWsClient):
 	def __init__(self, conf):
 		super(MarketMaker, self).__init__()
@@ -119,9 +41,9 @@ class MarketMaker(KolliderWsClient):
 		self.reference_price = None
 		reference_type = conf['trading_params']['reference_price_type']
 		if reference_type == "index":
-			self.reference_price = IndexPriceCalculator()
+			self.reference_price = IndexPriceCalc()
 		elif reference_type == "mid":
-			self.reference_price = MidPriceCalculator()
+			self.reference_price = MidPriceCalc()
 		else:
 			raise Exception(f'Unrecognized reference_price_type {reference_type} in config. \
 				Options are "index" and "mid".')
