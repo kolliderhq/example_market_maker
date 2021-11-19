@@ -1,9 +1,14 @@
+BTrees==4.9.2
 certifi==2021.10.8
+cffi==1.15.0
 charset-normalizer==2.0.7
 future==0.18.2
 greenlet==1.1.2
 idna==3.3
--e git+ssh://git@github.com/kolliderhq/kollider-api-client.git@c3553daf1d1553cf2cccdbea818840f761f5b02a#egg=kollider_api_client
+-e git+ssh://git@github.com/kolliderhq/kollider-api-client.git@86130842b8e3729899a32abcf5b02344f0b642ce#egg=kollider_api_client
+persistent==4.7.0
+pycparser==2.21
+PyYAML==6.0
 requests==2.26.0
 urllib3==1.26.7
 uuid==1.30

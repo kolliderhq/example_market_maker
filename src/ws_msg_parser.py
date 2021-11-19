@@ -21,7 +21,7 @@ def parse_msg(exchange_state, msg):
 			exchange_state.is_authenticated = False
 
 	elif t == ERROR:
-		print("{}".format(msg["message"]))
+		print("{}".format(data))
 
 	elif t == TICKER:
 		pass

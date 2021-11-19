@@ -113,16 +113,16 @@ def parse_tradable_symbols(msg=None):
 class OpenOrder(object):
 
     def __init__(self):
+        self.ext_order_id = str(uuid.uuid4())
         self.quantity = 0
         self.order_id = 0
         self.price = 0
         self.timestamp = ""
         self.filled = 0
-        self.ext_order_id = ""
         self.order_type = ""
         self.side = ""
         self.symbol = ""
-        self.leverage = 0
+        self.leverage = 100
         self.margin_type = ""
         self.settlement_type = ""
 

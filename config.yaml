@@ -1,12 +1,12 @@
-api_key: ""
-api_secret: ""
-api_passphrase: ""
+api_key: "AaCEwcVqPjYzU2HnxKilmQ=="
+api_secret: "0eTzBIhvYXE2XG/DbA4YQmw4ta/QlkkuLCYob0U60QQ="
+api_passphrase: "passphrase"
 ws_url: "ws://127.0.0.1:8084/"
 rest_url: ""
 symbol: "BTCUSD.PERP"
 index_symbol: ".BTCUSD"
 check_position_limits: false
-enable_dry_run: true # dry run will not send order and only print them to screen
+enable_dry_run: false # dry run will not send order and only print them to screen
 trading_params:
   reference_price_type: "mid" # options: "index", "mid"
   min_spread: 0.01

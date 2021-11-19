@@ -2,7 +2,7 @@ from uuid import uuid4
 from ws_msg_parser import parse_msg
 from kollider_api_client.ws import *
 from dtypes import *
-from src.calculators import *
+from calculators import *
 import random
 from decimal import Decimal
 
@@ -50,15 +50,6 @@ class MarketMaker(KolliderWsClient):
 
 	def on_message(self, _, msg):
 		parse_msg(self.exchange_state, msg)
-
-	def sub_orderbook_l2(self, symbol):
-		msg = {
-			"type": "subscribe",
-			"channels": ["orderbook_level2"],
-			"symbols": [symbol]
-		}
-		json_msg = json.dumps(msg)
-		self.ws.send(json_msg)
 
 	def update_start_prices(self):
 		# Making our reference price the current index price of the trade contract.
@@ -227,8 +218,11 @@ class MarketMaker(KolliderWsClient):
 					open_order.side = order.side
 					open_order.order_id = order.order_id
 					open_order.symbol = order.symbol
+					open_order.order_type = "Limit"
+					open_order.margin_type = "Isolated"
 					open_order.settlement_type = "Delayed"
 					open_order.timestamp = int(time())
+					print(open_order.to_dict())
 					to_amend.append(open_order)
 			except IndexError:
 				# Will throw if there isn't a desired order to match. In that case, cancel it.
