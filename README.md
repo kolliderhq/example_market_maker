@@ -18,7 +18,7 @@ python src/main.py
 
 ### Current Strategies
 
-You can configure the strategy of the Market Maker in the `config.yaml`. We are following the framework laid out in ["Demystifying Market Making"](https://kollider.medium.com/long-story-short-demystifying-market-making-98efe4f709da).
+You can configure the strategy of the Market Maker in the `config.yaml`. We are following the framework laid out in *[Demystifying Market Making](https://kollider.medium.com/long-story-short-demystifying-market-making-98efe4f709da)*.
 
 #### Mid Price
 
