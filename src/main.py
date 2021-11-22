@@ -71,6 +71,8 @@ class MarketMaker(KolliderWsClient):
 		self.start_price_bid = self.reference_price.get_price() * (1 - self.conf['trading_params']['offset_pct'])
 		self.start_price_ask = self.reference_price.get_price() * (1 + self.conf['trading_params']['offset_pct'])
 
+		# print(f"Got start prices of {self.start_price_bid} {self.start_price_ask}")
+
 		# Back off if our spread is too small.
 		min_spread = self.conf['trading_params']['min_spread']
 		if self.start_price_bid * (1.00 + min_spread) > self.start_price_ask:
@@ -127,12 +129,12 @@ class MarketMaker(KolliderWsClient):
 
 		return order
 
-	def place_orders(self):
+	def create_orders(self):
 		buy_orders = []
 		sell_orders = []
 
 		if self.update_start_prices() is False:
-			return
+			return False
 
 		long_btc_remaining = self.long_btc_remaining()
 		short_btc_remaining = self.short_btc_remaining()
@@ -156,14 +158,19 @@ class MarketMaker(KolliderWsClient):
 		buy_orders = list(reversed(buy_orders))
 		sell_orders = list(reversed(sell_orders))
 
-		if self.conf["enable_dry_run"] and (len(buy_orders) > 0 or len(sell_orders)):
+		if self.conf["enable_dry_run"]:
+			self.handle_dry_run(buy_orders, sell_orders)
+			return True
+		else:
+			return self.converge_orders(buy_orders, sell_orders)
+
+	def handle_dry_run(self, buy_orders, sell_orders):
+		if len(buy_orders) > 0 or len(sell_orders):
 			print ("Dry run. Would place the following orders:")
 			for sell in sell_orders:
 				print (f"{sell.side} {sell.quantity} @ price {sell.price}")
 			for buy in reversed(buy_orders):
 				print (f"{buy.side} {buy.quantity} @ price {buy.price}")
-		else:
-			return self.converge_orders(buy_orders, sell_orders)
 
 	def converge_orders(self, buy_orders, sell_orders):
 		# Covering and quoting on price is somewhat independent.
@@ -209,9 +216,9 @@ class MarketMaker(KolliderWsClient):
 				remaining_quantity = order.quantity - order.filled
 				level_index = level_indices[index]
 				if desired_order.quantity != remaining_quantity or (
-						# If price has changed, and the change is more than our RELIST_INTERVAL, amend.
+						# If price has changed, and the change is more than our relist_tolerance, amend.
 						desired_order.price != order.price and
-						abs((desired_order.price / order.price) - 1) > trading_params["relist_tollerance"]):
+						abs((desired_order.price / order.price) - 1) > trading_params["relist_tolerance"]):
 					open_order = OpenOrder()
 					open_order.price = desired_order.price
 					open_order.quantity = desired_order.quantity
@@ -222,7 +229,6 @@ class MarketMaker(KolliderWsClient):
 					open_order.margin_type = "Isolated"
 					open_order.settlement_type = "Delayed"
 					open_order.timestamp = int(time())
-					print(open_order.to_dict())
 					to_amend.append(open_order)
 			except IndexError:
 				# Will throw if there isn't a desired order to match. In that case, cancel it.
@@ -312,9 +318,7 @@ class MarketMaker(KolliderWsClient):
 			success = self.update_start_prices()
 			if not success:
 				continue
-			self.place_orders()
-
-
+			self.create_orders()
 
 if __name__ in "__main__":
 	import yaml
