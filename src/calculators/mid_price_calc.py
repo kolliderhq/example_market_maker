@@ -41,7 +41,7 @@ class MidPriceCalc(object):
 						dp = 0
 					self.price = mid_price * (10**-dp)
 
-					print(f"Got bid {bid_price}, ask {ask_price}, mid {mid_price}, and calc'd {self.price}")
+					# print(f"Got bid {bid_price}, ask {ask_price}, mid {mid_price}, and calc'd {self.price}")
 
 					self.is_done = True
 				except IndexError as e:

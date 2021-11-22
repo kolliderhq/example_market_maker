@@ -49,7 +49,8 @@ def parse_msg(exchange_state, msg):
 			exchange_state.open_orders[symbol] = open_orders
 
 	elif t == USER_ACCOUNTS:
-		print("Received User Accounts")
+		pass
+		# print("Received User Accounts")
 		# print(data)
 
 	elif t == WHOAMI:
@@ -57,7 +58,8 @@ def parse_msg(exchange_state, msg):
 		print(data)
 
 	elif t == RECEIVED:
-		print("Received Order Received.")
+		pass
+		# print("Received Order Received.")
 		# print(data)
 
 	elif t == DONE:
