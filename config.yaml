@@ -10,7 +10,7 @@ enable_dry_run: true # dry run will not send order and only print them to screen
 trading_params:
   reference_price_type: "mid" # options: "index", "mid"
   min_spread: 0.0005
-  offset_pct: 0.001 # used to calculat start prices (e.g. 0.01 is 1% off either side ref price)
+  offset_pct: 0.001 # used to calculate start prices (e.g. 0.01 is 1% off either side ref price)
   stack_pct: 0.001 # e.g. 0.01 is 1% of start price per level
   relist_tolerance: 0.0005
   is_random_order_size: false
