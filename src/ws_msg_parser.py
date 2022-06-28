@@ -138,7 +138,7 @@ def parse_msg(exchange_state, msg):
 
 	elif t == ORDER_REJECTION:
 		print("Received Order Rejection.")
-		# print(data)
+		print(data)
 
 	elif t == SUCCESS:
 		# print(data)

@@ -124,7 +124,7 @@ class MarketMaker(KolliderWsClient):
 		order.order_type = "Limit"
 		order.ext_order_id = str(uuid4())
 		order.timestamp = int(time())
-		order.leverage = 100
+		order.leverage = self.conf["trading_params"]["leverage"]
 		order.quantity = quantity # in contract qty (vs "value")
 
 		return order

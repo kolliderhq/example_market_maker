@@ -5,7 +5,6 @@ charset-normalizer==2.0.7
 future==0.18.2
 greenlet==1.1.2
 idna==3.3
--e git+ssh://git@github.com/kolliderhq/kollider-api-client.git@86130842b8e3729899a32abcf5b02344f0b642ce#egg=kollider_api_client
 persistent==4.7.0
 pycparser==2.21
 PyYAML==6.0

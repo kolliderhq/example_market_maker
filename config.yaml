@@ -1,7 +1,7 @@
 api_key: ""
 api_secret: ""
 api_passphrase: ""
-ws_url: "ws://127.0.0.1:8084/"
+ws_url: "wss://api.kollider.xyz/v1/ws/"
 rest_url: ""
 symbol: "BTCUSD.PERP"
 index_symbol: ".BTCUSD"
@@ -9,12 +9,13 @@ check_position_limits: false
 enable_dry_run: true # dry run will not send order and only print them to screen
 trading_params:
   reference_price_type: "mid" # options: "index", "mid"
+  leverage: 2000 # 20x leverage. 100 corresponds to 1x leverage.
   min_spread: 0.0005
-  offset_pct: 0.001 # used to calculat start prices (e.g. 0.01 is 1% off either side ref price)
+  offset_pct: 0.0001 # used to calculat start prices (e.g. 0.01 is 1% off either side ref price)
   stack_pct: 0.001 # e.g. 0.01 is 1% of start price per level
   relist_tolerance: 0.0005
   is_random_order_size: false
-  start_order_size: 50
+  start_order_size: 2
   order_step_size: 10
   num_levels: 2 # the number of orders the MM will make on each side
   max_long_pos_btc: 1
